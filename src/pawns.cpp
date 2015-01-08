@@ -33,33 +33,32 @@ namespace {
 
   // Doubled pawn penalty by file
   const Score Doubled[FILE_NB] = {
-    S(13, 43), S(20, 48), S(23, 48), S(23, 48),
-    S(23, 48), S(23, 48), S(20, 48), S(13, 43) };
+    S(12, 46), S(18, 48), S(22, 48), S(23, 48),
+    S(23, 48), S(22, 48), S(18, 48), S(12, 46) };
 
   // Isolated pawn penalty by opposed flag and file
   const Score Isolated[2][FILE_NB] = {
-  { S(37, 45), S(54, 52), S(60, 52), S(60, 52),
-    S(60, 52), S(60, 52), S(54, 52), S(37, 45) },
-  { S(25, 30), S(36, 35), S(40, 35), S(40, 35),
-    S(40, 35), S(40, 35), S(36, 35), S(25, 30) } };
+  { S(36, 42), S(55, 51), S(61, 51), S(61, 51),
+    S(61, 51), S(61, 51), S(55, 51), S(36, 42) },
+  { S(25, 31), S(36, 36), S(43, 36), S(43, 36),
+    S(43, 36), S(43, 36), S(36, 36), S(25, 31) } };
 
   // Backward pawn penalty by opposed flag and file
   const Score Backward[2][FILE_NB] = {
-  { S(30, 42), S(43, 46), S(49, 46), S(49, 46),
-    S(49, 46), S(49, 46), S(43, 46), S(30, 42) },
-  { S(20, 28), S(29, 31), S(33, 31), S(33, 31),
-    S(33, 31), S(33, 31), S(29, 31), S(20, 28) } };
+  { S(31, 43), S(41, 45), S(49, 45), S(49, 45),
+    S(49, 45), S(49, 45), S(41, 45), S(31, 43) },
+  { S(22, 27), S(28, 30), S(34, 30), S(34, 30),
+    S(34, 30), S(34, 30), S(28, 30), S(22, 27) } };
 
   // Connected pawn bonus by opposed, phalanx flags and rank
   Score Connected[2][2][RANK_NB];
 
   // Levers bonus by rank
   const Score Lever[RANK_NB] = {
-    S( 0, 0), S( 0, 0), S(0, 0), S(0, 0),
-    S(20,20), S(40,40), S(0, 0), S(0, 0) };
+    S( 0, 0), S( 1, 0), S(2, 2), S(2, 3), S(25, 20), S(43, 45) };
 
   // Unsupported pawn penalty
-  const Score UnsupportedPawnPenalty = S(20, 10);
+  const Score UnsupportedPawnPenalty = S(13, 10);
 
   // Weakness of our pawn shelter in front of the king by [distance from edge][rank]
   const Value ShelterWeakness[][RANK_NB] = {
@@ -209,14 +208,14 @@ namespace Pawns {
 
 void init()
 {
-  static const int Seed[RANK_NB] = { 0, 6, 15, 10, 57, 75, 135, 258 };
+  static const int Seed[RANK_NB] = { 0, 6, 14, 11, 58, 74, 132, 258 };
 
   for (int opposed = 0; opposed <= 1; ++opposed)
       for (int phalanx = 0; phalanx <= 1; ++phalanx)
           for (Rank r = RANK_2; r < RANK_8; ++r)
           {
-              int bonus = Seed[r] + (phalanx ? (Seed[r + 1] - Seed[r]) / 2 : 0);
-              Connected[opposed][phalanx][r] = make_score(bonus / 2, bonus >> opposed);
+              int bonus = Seed[r] + (phalanx ? (Seed[r + 1] - Seed[r]) * 63 / 128 : 0);
+              Connected[opposed][phalanx][r] = make_score(bonus * 63 / 128, bonus >> opposed);
           }
 }
 
