@@ -80,6 +80,7 @@ struct Entry {
 typedef HashTable<Entry, 16384> Table;
 
 void init();
+void init_spsa();
 Entry* probe(const Position& pos);
 
 } // namespace Pawns
