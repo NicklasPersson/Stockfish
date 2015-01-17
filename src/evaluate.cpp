@@ -91,7 +91,7 @@ namespace {
   // Evaluation weights, indexed by evaluation term
   enum { Mobility, PawnStructure, PassedPawns, Space, KingSafety };
   const struct Weight { int mg, eg; } Weights[] = {
-    {289, 344}, {233, 201}, {221, 273}, {46, 0}, {321, 0}
+    {289, 344}, {233, 201}, {221, 273}, {46, 0}, {322, 0}
   };
 
   #define V(v) Value(v)
@@ -186,13 +186,13 @@ namespace {
   // index to KingDanger[].
   //
   // KingAttackWeights[PieceType] contains king attack weights by piece type
-  const int KingAttackWeights[] = { 0, 0, 6, 2, 5, 5 };
+  const int KingAttackWeights[] = { 0, 0, 6, 3, 5, 4 };
 
   // Bonuses for enemy's safe checks
-  const int QueenContactCheck = 92;
-  const int RookContactCheck  = 68;
+  const int QueenContactCheck = 91;
+  const int RookContactCheck  = 69;
   const int QueenCheck        = 50;
-  const int RookCheck         = 36;
+  const int RookCheck         = 37;
   const int BishopCheck       = 7;
   const int KnightCheck       = 14;
 
@@ -411,9 +411,9 @@ namespace {
         // number and types of the enemy's attacking pieces, the number of
         // attacked and undefended squares around our king and the quality of
         // the pawn shelter (current 'score' value).
-        attackUnits =  std::min(77, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
+        attackUnits =  std::min(76, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
                      + 10 * ei.kingAdjacentZoneAttacksCount[Them]
-                     + 19 * popcount<Max15>(undefended)
+                     + 21 * popcount<Max15>(undefended)
                      +  9 * (ei.pinnedPieces[Us] != 0)
                      - mg_value(score) * 63 / 512
                      - !pos.count<QUEEN>(Them) * 60;
@@ -891,7 +891,7 @@ namespace Eval {
 
   void init() {
 
-    const double MaxSlope = 7.5;
+    const double MaxSlope = 7.8;
     const double Peak = 1280;
     double t = 0.0;
 
