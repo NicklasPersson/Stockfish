@@ -91,7 +91,7 @@ namespace {
   // Evaluation weights, indexed by evaluation term
   enum { Mobility, PawnStructure, PassedPawns, Space, KingSafety };
   const struct Weight { int mg, eg; } Weights[] = {
-    {289, 344}, {233, 201}, {221, 273}, {46, 0}, {324, 0}
+    {289, 344}, {233, 201}, {221, 273}, {46, 0}, {326, 0}
   };
 
   #define V(v) Value(v)
@@ -186,15 +186,15 @@ namespace {
   // index to KingDanger[].
   //
   // KingAttackWeights[PieceType] contains king attack weights by piece type
-  const int KingAttackWeights[] = { 0, 0, 8, 4, 4, 1 };
+  const int KingAttackWeights[] = { 0, 0, 8, 4, 5, 1 };
 
   // Bonuses for enemy's safe checks
   const int QueenContactCheck = 89;
   const int RookContactCheck  = 72;
-  const int QueenCheck        = 51;
+  const int QueenCheck        = 50;
   const int RookCheck         = 38;
-  const int BishopCheck       = 5;
-  const int KnightCheck       = 16;
+  const int BishopCheck       = 4;
+  const int KnightCheck       = 17;
 
   // KingDanger[attackUnits] contains the actual king danger weighted
   // scores, indexed by a calculated integer number.
@@ -411,11 +411,11 @@ namespace {
         // number and types of the enemy's attacking pieces, the number of
         // attacked and undefended squares around our king and the quality of
         // the pawn shelter (current 'score' value).
-        attackUnits =  std::min(74, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
-                     + 9 * ei.kingAdjacentZoneAttacksCount[Them]
+        attackUnits =  std::min(73, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
+                     + 10 * ei.kingAdjacentZoneAttacksCount[Them]
                      + 25 * popcount<Max15>(undefended)
                      +  10 * (ei.pinnedPieces[Us] != 0)
-                     - mg_value(score) / 8
+                     - mg_value(score) * 65 / 512
                      - !pos.count<QUEEN>(Them) * 60;
 
         // Analyse the enemy's safe queen contact checks. Firstly, find the
@@ -891,8 +891,8 @@ namespace Eval {
 
   void init() {
 
-    const double MaxSlope = 8.5;
-    const double Peak = 1280;
+    const double MaxSlope = 8.4;
+    const double Peak = 1282;
     double t = 0.0;
 
     for (int i = 1; i < 400; ++i)
