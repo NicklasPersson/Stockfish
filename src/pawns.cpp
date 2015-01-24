@@ -63,33 +63,33 @@ namespace {
 
   // Weakness of our pawn shelter in front of the king by [distance from edge][rank]
   const Value ShelterWeakness[][RANK_NB] = {
-  { V( 99), V(21), V(23), V(59), V(87), V( 90), V(106) },
-  { V(117), V( 1), V(29), V(75), V(98), V(104), V(110) },
-  { V(104), V( 1), V(47), V(75), V(83), V(102), V( 95) },
-  { V( 80), V( 9), V(38), V(64), V(93), V( 90), V(110) } };
+  { V( 99), V(21), V(24), V(59), V(85), V( 93), V(107) },
+  { V(119), V( 2), V(28), V(72), V(96), V(104), V(114) },
+  { V(104), V( 1), V(47), V(74), V(84), V(103), V( 94) },
+  { V( 78), V( 9), V(38), V(63), V(93), V( 92), V(114) } };
 
   // Danger of enemy pawns moving toward our king by [type][distance from edge][rank]
   const Value StormDanger[][4][RANK_NB] = {
-  { { V( 0),  V(  65), V( 128), V(38), V(27) },
-    { V( 0),  V(  58), V( 133), V(39), V(25) },
-    { V( 0),  V(  55), V( 116), V(47), V(31) },
-    { V( 0),  V(  62), V( 126), V(57), V(30) } },
-  { { V(23),  V(  47), V(  91), V(45), V(23) },
-    { V(24),  V(  25), V( 106), V(36), V(18) },
-    { V(23),  V(  32), V(  96), V(36), V(23) },
-    { V(29),  V(  20), V( 102), V(36), V(27) } },
-  { { V( 0),  V(   0), V(  82), V(19), V( 3) },
-    { V( 0),  V(   0), V( 167), V(30), V( 6) },
-    { V( 0),  V(   0), V( 165), V(22), V(10) },
-    { V( 0),  V(   0), V( 161), V(32), V(12) } },
-  { { V( 0),  V(-293), V(-298), V(56), V(27) },
-    { V( 0),  V(  68), V( 133), V(43), V(18) },
-    { V( 0),  V(  66), V( 140), V(49), V(34) },
-    { V( 0),  V(  61), V( 128), V(50), V(24) } } };
+  { { V( 0),  V(  64), V( 126), V(36), V(27) },
+    { V( 0),  V(  58), V( 136), V(39), V(25) },
+    { V( 0),  V(  55), V( 114), V(45), V(31) },
+    { V( 0),  V(  62), V( 129), V(56), V(30) } },
+  { { V(23),  V(  45), V(  91), V(47), V(23) },
+    { V(25),  V(  25), V( 105), V(36), V(18) },
+    { V(22),  V(  32), V(  99), V(35), V(22) },
+    { V(30),  V(  20), V( 105), V(38), V(28) } },
+  { { V( 0),  V(   0), V(  81), V(19), V( 3) },
+    { V( 0),  V(   0), V( 169), V(30), V( 5) },
+    { V( 0),  V(   0), V( 166), V(23), V(10) },
+    { V( 0),  V(   0), V( 164), V(32), V(11) } },
+  { { V( 0),  V(-293), V(-298), V(57), V(27) },
+    { V( 0),  V(  66), V( 136), V(43), V(18) },
+    { V( 0),  V(  67), V( 140), V(50), V(34) },
+    { V( 0),  V(  63), V( 126), V(51), V(23) } } };
 
   // Max bonus for king safety. Corresponds to start position with all the pawns
   // in front of the king and no enemy pawn on the horizon.
-  const Value MaxSafetyBonus = V(253);
+  const Value MaxSafetyBonus = V(252);
 
   #undef S
   #undef V
