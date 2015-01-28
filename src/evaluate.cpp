@@ -27,6 +27,7 @@
 #include "evaluate.h"
 #include "material.h"
 #include "pawns.h"
+#include "uci.h"
 
 namespace {
 
@@ -90,7 +91,7 @@ namespace {
 
   // Evaluation weights, indexed by evaluation term
   enum { Mobility, PawnStructure, PassedPawns, Space, KingSafety };
-  const struct Weight { int mg, eg; } Weights[] = {
+  struct Weight { int mg, eg; } Weights[] = {
     {289, 344}, {233, 201}, {221, 273}, {46, 0}, {324, 0}
   };
 
@@ -186,15 +187,22 @@ namespace {
   // index to KingDanger[].
   //
   // KingAttackWeights[PieceType] contains king attack weights by piece type
-  const int KingAttackWeights[] = { 0, 0, 8, 4, 4, 1 };
+  int KingAttackWeights[] = { 0, 0, 8, 4, 4, 1 };
 
   // Bonuses for enemy's safe checks
-  const int QueenContactCheck = 89;
-  const int RookContactCheck  = 72;
-  const int QueenCheck        = 51;
-  const int RookCheck         = 38;
-  const int BishopCheck       = 5;
-  const int KnightCheck       = 16;
+  int QueenContactCheck = 89;
+  int RookContactCheck  = 72;
+  int QueenCheck        = 51;
+  int RookCheck         = 38;
+  int BishopCheck       = 5;
+  int KnightCheck       = 16;
+  
+  int AUmax = 74;
+  int AUzone = 9;
+  int AUundefended = 25;
+  int AUpinned = 10;
+  int AUscoreFactor = 64; // 0..256
+  int AUnoQueen = 60;
 
   // KingDanger[attackUnits] contains the actual king danger weighted
   // scores, indexed by a calculated integer number.
@@ -411,12 +419,12 @@ namespace {
         // number and types of the enemy's attacking pieces, the number of
         // attacked and undefended squares around our king and the quality of
         // the pawn shelter (current 'score' value).
-        attackUnits =  std::min(74, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
-                     + 9 * ei.kingAdjacentZoneAttacksCount[Them]
-                     + 25 * popcount<Max15>(undefended)
-                     +  10 * (ei.pinnedPieces[Us] != 0)
-                     - mg_value(score) / 8
-                     - !pos.count<QUEEN>(Them) * 60;
+        attackUnits =  std::min(AUmax, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
+                     + AUzone * ei.kingAdjacentZoneAttacksCount[Them]
+                     + AUundefended * popcount<Max15>(undefended)
+                     +  AUpinned * (ei.pinnedPieces[Us] != 0)
+                     - mg_value(score) * AUscoreFactor / 512
+                     - !pos.count<QUEEN>(Them) * AUnoQueen;
 
         // Analyse the enemy's safe queen contact checks. Firstly, find the
         // undefended squares around the king reachable by the enemy queen...
@@ -885,21 +893,50 @@ namespace Eval {
   std::string trace(const Position& pos) {
     return Tracing::do_trace(pos);
   }
-
+  
+  double MaxSlope = 8.5;
+  double Peak = 1280;
+  double Factor = 0.027;
 
   /// init() computes evaluation weights, usually at startup
 
   void init() {
 
-    const double MaxSlope = 8.5;
-    const double Peak = 1280;
     double t = 0.0;
 
     for (int i = 1; i < 400; ++i)
     {
-        t = std::min(Peak, std::min(0.027 * i * i, t + MaxSlope));
+        t = std::min(Peak, std::min(Factor * i * i, t + MaxSlope));
         KingDanger[i] = apply_weight(make_score(int(t), 0), Weights[KingSafety]);
     }
   }
+  
+  void init_spsa()
+ {
+ Weights[KingSafety].mg = int(Options["KingSafetyWeight"]);
+ 
+ KingAttackWeights[2] = int(Options["KingAttackWeights2"]);
+ KingAttackWeights[3] = int(Options["KingAttackWeights3"]);
+ KingAttackWeights[4] = int(Options["KingAttackWeights4"]);
+ KingAttackWeights[5] = int(Options["KingAttackWeights5"]);
+ 
+ QueenContactCheck = int(Options["QueenContactCheck"]);
+ RookContactCheck = int(Options["RookContactCheck"]);
+ QueenCheck = int(Options["QueenCheck"]);
+ RookCheck = int(Options["RookCheck"]);
+ BishopCheck = int(Options["BishopCheck"]);
+ KnightCheck = int(Options["KnightCheck"]);
+ 
+ AUmax = int(Options["AUmax"]);
+ AUzone = int(Options["AUzone"]);
+ AUundefended = int(Options["AUundefended"]);
+ AUpinned = int(Options["AUpinned"]);
+ AUscoreFactor = int(Options["AUscoreFactor"]);
+ AUnoQueen = int(Options["AUnoQueen"]);
+ 
+ MaxSlope = 0.085 * int(Options["KDMaxSlope"]);
+ Peak = int(Options["KDPeak"]);
+ Factor = 0.00027 * int(Options["KDFactor"]);
+ }
 
 } // namespace Eval
