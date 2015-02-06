@@ -25,6 +25,7 @@
 #include "pawns.h"
 #include "position.h"
 #include "thread.h"
+#include "uci.h"
 
 namespace {
 
@@ -62,14 +63,14 @@ namespace {
   const Score UnsupportedPawnPenalty = S(20, 10);
 
   // Weakness of our pawn shelter in front of the king by [distance from edge][rank]
-  const Value ShelterWeakness[][RANK_NB] = {
+  Value ShelterWeakness[][RANK_NB] = {
   { V( 99), V(20), V(26), V(54), V(85), V( 92), V(108) },
   { V(117), V( 1), V(27), V(71), V(94), V(104), V(118) },
   { V(104), V( 4), V(51), V(76), V(82), V(102), V( 97) },
   { V( 80), V(12), V(43), V(65), V(88), V( 91), V(115) } };
 
   // Danger of enemy pawns moving toward our king by [type][distance from edge][rank]
-  const Value StormDanger[][4][RANK_NB] = {
+  Value StormDanger[][4][RANK_NB] = {
   { { V( 0),  V(  65), V( 126), V(36), V(30) },
     { V( 0),  V(  55), V( 135), V(36), V(23) },
     { V( 0),  V(  47), V( 116), V(45), V(26) },
@@ -89,7 +90,7 @@ namespace {
 
   // Max bonus for king safety. Corresponds to start position with all the pawns
   // in front of the king and no enemy pawn on the horizon.
-  const Value MaxSafetyBonus = V(258);
+  Value MaxSafetyBonus = V(258);
 
   #undef S
   #undef V
@@ -219,6 +220,110 @@ void init()
           }
 }
 
+void init_spsa()
+{
+MaxSafetyBonus = Value(int(Options["maxSafety"]));
+
+ShelterWeakness[0][0] = Value(int(Options["sw00"]));
+ShelterWeakness[0][1] = Value(int(Options["sw01"]));
+ShelterWeakness[0][2] = Value(int(Options["sw02"]));
+ShelterWeakness[0][3] = Value(int(Options["sw03"]));
+ShelterWeakness[0][4] = Value(int(Options["sw04"]));
+ShelterWeakness[0][5] = Value(int(Options["sw05"]));
+ShelterWeakness[0][6] = Value(int(Options["sw06"]));
+
+ShelterWeakness[1][0] = Value(int(Options["sw10"]));
+ShelterWeakness[1][1] = Value(int(Options["sw11"]));
+ShelterWeakness[1][2] = Value(int(Options["sw12"]));
+ShelterWeakness[1][3] = Value(int(Options["sw13"]));
+ShelterWeakness[1][4] = Value(int(Options["sw14"]));
+ShelterWeakness[1][5] = Value(int(Options["sw15"]));
+ShelterWeakness[1][6] = Value(int(Options["sw16"]));
+
+ShelterWeakness[2][0] = Value(int(Options["sw20"]));
+ShelterWeakness[2][1] = Value(int(Options["sw21"]));
+ShelterWeakness[2][2] = Value(int(Options["sw22"]));
+ShelterWeakness[2][3] = Value(int(Options["sw23"]));
+ShelterWeakness[2][4] = Value(int(Options["sw24"]));
+ShelterWeakness[2][5] = Value(int(Options["sw25"]));
+ShelterWeakness[2][6] = Value(int(Options["sw26"]));
+
+ShelterWeakness[3][0] = Value(int(Options["sw30"]));
+ShelterWeakness[3][1] = Value(int(Options["sw31"]));
+ShelterWeakness[3][2] = Value(int(Options["sw32"]));
+ShelterWeakness[3][3] = Value(int(Options["sw33"]));
+ShelterWeakness[3][4] = Value(int(Options["sw34"]));
+ShelterWeakness[3][5] = Value(int(Options["sw35"]));
+ShelterWeakness[3][6] = Value(int(Options["sw36"]));
+
+StormDanger[0][0][1] = Value(int(Options["sd001"]));
+StormDanger[0][0][2] = Value(int(Options["sd002"]));
+StormDanger[0][0][3] = Value(int(Options["sd003"]));
+StormDanger[0][0][4] = Value(int(Options["sd004"]));
+StormDanger[0][1][1] = Value(int(Options["sd011"]));
+StormDanger[0][1][2] = Value(int(Options["sd012"]));
+StormDanger[0][1][3] = Value(int(Options["sd013"]));
+StormDanger[0][1][4] = Value(int(Options["sd014"]));
+StormDanger[0][2][1] = Value(int(Options["sd021"]));
+StormDanger[0][2][2] = Value(int(Options["sd022"]));
+StormDanger[0][2][3] = Value(int(Options["sd023"]));
+StormDanger[0][2][4] = Value(int(Options["sd024"]));
+StormDanger[0][3][1] = Value(int(Options["sd031"]));
+StormDanger[0][3][2] = Value(int(Options["sd032"]));
+StormDanger[0][3][3] = Value(int(Options["sd033"]));
+StormDanger[0][3][4] = Value(int(Options["sd034"]));
+
+StormDanger[1][0][0] = Value(int(Options["sd100"]));
+StormDanger[1][0][1] = Value(int(Options["sd101"]));
+StormDanger[1][0][2] = Value(int(Options["sd102"]));
+StormDanger[1][0][3] = Value(int(Options["sd103"]));
+StormDanger[1][0][4] = Value(int(Options["sd104"]));
+StormDanger[1][1][0] = Value(int(Options["sd110"]));
+StormDanger[1][1][1] = Value(int(Options["sd111"]));
+StormDanger[1][1][2] = Value(int(Options["sd112"]));
+StormDanger[1][1][3] = Value(int(Options["sd113"]));
+StormDanger[1][1][4] = Value(int(Options["sd114"]));
+StormDanger[1][2][0] = Value(int(Options["sd120"]));
+StormDanger[1][2][1] = Value(int(Options["sd121"]));
+StormDanger[1][2][2] = Value(int(Options["sd122"]));
+StormDanger[1][2][3] = Value(int(Options["sd123"]));
+StormDanger[1][2][4] = Value(int(Options["sd124"]));
+StormDanger[1][3][0] = Value(int(Options["sd130"]));
+StormDanger[1][3][1] = Value(int(Options["sd131"]));
+StormDanger[1][3][2] = Value(int(Options["sd132"]));
+StormDanger[1][3][3] = Value(int(Options["sd133"]));
+StormDanger[1][3][4] = Value(int(Options["sd134"]));
+
+StormDanger[2][0][2] = Value(int(Options["sd202"]));
+StormDanger[2][0][3] = Value(int(Options["sd203"]));
+StormDanger[2][0][4] = Value(int(Options["sd204"]));
+StormDanger[2][1][2] = Value(int(Options["sd212"]));
+StormDanger[2][1][3] = Value(int(Options["sd213"]));
+StormDanger[2][1][4] = Value(int(Options["sd214"]));
+StormDanger[2][2][2] = Value(int(Options["sd222"]));
+StormDanger[2][2][3] = Value(int(Options["sd223"]));
+StormDanger[2][2][4] = Value(int(Options["sd224"]));
+StormDanger[2][3][2] = Value(int(Options["sd232"]));
+StormDanger[2][3][3] = Value(int(Options["sd233"]));
+StormDanger[2][3][4] = Value(int(Options["sd234"]));
+
+StormDanger[3][0][1] = Value(int(Options["sd301"]));
+StormDanger[3][0][2] = Value(int(Options["sd302"]));
+StormDanger[3][0][3] = Value(int(Options["sd303"]));
+StormDanger[3][0][4] = Value(int(Options["sd304"]));
+StormDanger[3][1][1] = Value(int(Options["sd311"]));
+StormDanger[3][1][2] = Value(int(Options["sd312"]));
+StormDanger[3][1][3] = Value(int(Options["sd313"]));
+StormDanger[3][1][4] = Value(int(Options["sd314"]));
+StormDanger[3][2][1] = Value(int(Options["sd321"]));
+StormDanger[3][2][2] = Value(int(Options["sd322"]));
+StormDanger[3][2][3] = Value(int(Options["sd323"]));
+StormDanger[3][2][4] = Value(int(Options["sd324"]));
+StormDanger[3][3][1] = Value(int(Options["sd331"]));
+StormDanger[3][3][2] = Value(int(Options["sd332"]));
+StormDanger[3][3][3] = Value(int(Options["sd333"]));
+StormDanger[3][3][4] = Value(int(Options["sd334"]));
+}
 
 /// Pawns::probe() looks up the current position's pawns configuration in
 /// the pawns hash table. It returns a pointer to the Entry if the position
