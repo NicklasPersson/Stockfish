@@ -188,15 +188,15 @@ namespace {
   // index to KingDanger[].
   //
   // KingAttackWeights[PieceType] contains king attack weights by piece type
-  const int KingAttackWeights[] = { 0, 0, 7, 5, 4, 1 };
+  const int KingAttackWeights[] = { 0, 0, 7, 7, 4, 1 };
 
   // Bonuses for enemy's safe checks
   const int QueenContactCheck = 89;
   const int RookContactCheck  = 71;
   const int QueenCheck        = 50;
-  const int RookCheck         = 37;
+  const int RookCheck         = 35;
   const int BishopCheck       = 6;
-  const int KnightCheck       = 14;
+  const int KnightCheck       = 15;
 
   // KingDanger[attackUnits] contains the actual king danger weighted
   // scores, indexed by a calculated integer number.
@@ -413,9 +413,9 @@ namespace {
         // number and types of the enemy's attacking pieces, the number of
         // attacked and undefended squares around our king and the quality of
         // the pawn shelter (current 'score' value).
-        attackUnits =  std::min(74, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
-                     + 8 * ei.kingAdjacentZoneAttacksCount[Them]
-                     + 25 * popcount<Max15>(undefended)
+        attackUnits =  std::min(71, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
+                     + 9 * ei.kingAdjacentZoneAttacksCount[Them]
+                     + 24 * popcount<Max15>(undefended)
                      +  11 * (ei.pinnedPieces[Us] != 0)
                      - mg_value(score) * 31 / 256
                      - !pos.count<QUEEN>(Them) * 60;
@@ -917,13 +917,13 @@ namespace Eval {
 
   void init() {
 
-    const int MaxSlope = 87;
+    const int MaxSlope = 89;
     const int Peak = 12800;
     int t = 0;
 
     for (int i = 0; i < 400; ++i)
     {
-        t = std::min(Peak, std::min(i * i * 27 / 100, t + MaxSlope));
+        t = std::min(Peak, std::min(i * i * 28 / 100, t + MaxSlope));
         KingDanger[i] = apply_weight(make_score(t / 10, 0), Weights[KingSafety]);
     }
   }
