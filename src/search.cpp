@@ -158,7 +158,8 @@ namespace {
 
 void Search::init() {
 
-  const double K[][2] = {{ 0.83, 2.25 }, { 0.50, 3.00 }};
+  const double K[][2] = {{ 0.83 * int(Options["lmr00"]) / 100, 2.19 * int(Options["lmr01"]) / 100},
+                         { 0.49 * int(Options["lmr10"]) / 100, 2.97 * int(Options["lmr11"]) / 100}};
 
   for (int pv = 0; pv <= 1; ++pv)
       for (int imp = 0; imp <= 1; ++imp)
@@ -964,7 +965,8 @@ moves_loop: // When in check and at SpNode search starts from here
           ss->reduction = reduction<PvNode>(improving, depth, moveCount);
 
           if (   (!PvNode && cutNode)
-              ||  History[pos.piece_on(to_sq(move))][to_sq(move)] < VALUE_ZERO)
+              || History[pos.piece_on(to_sq(move))][to_sq(move)] < VALUE_ZERO
+              || CounterMovesHistory[pos.piece_on(prevMoveSq)][prevMoveSq][pos.piece_on(to_sq(move))][to_sq(move)] + History[pos.piece_on(to_sq(move))][to_sq(move)] < VALUE_ZERO)
               ss->reduction += ONE_PLY;
 
           if (move == countermoves[0] || move == countermoves[1])
