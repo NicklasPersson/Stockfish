@@ -171,10 +171,22 @@ namespace {
   };
 
   // PassedFile[File] contains a bonus according to the file of a passed pawn.
-  const Score PassedFile[] = {
+  Score PassedFile[] = {
     S( 14,  13), S( 2,  5), S(-3, -4), S(-19, -14),
     S(-19, -14), S(-3, -4), S( 2,  5), S( 14,  13)
   };
+
+  Score PassedFileTune[] = {S( 14,  13), S( 2,  5), S(-3, -4), S(-19, -14)};
+
+   void post_update()
+   {
+     PassedFile[FILE_A] = PassedFile[FILE_H] = PassedFileTune[0];
+     PassedFile[FILE_B] = PassedFile[FILE_G] = PassedFileTune[1];
+     PassedFile[FILE_C] = PassedFile[FILE_F] = PassedFileTune[2];
+     PassedFile[FILE_D] = PassedFile[FILE_E] = PassedFileTune[3];
+   }
+
+   TUNE(SetRange(-50,50), PassedFileTune, post_update);
 
   const Score ThreatenedByHangingPawn = S(40, 60);
 
