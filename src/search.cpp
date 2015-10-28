@@ -393,7 +393,7 @@ void Thread::search(bool isMainThread) {
           // Reset aspiration window starting size
           if (rootDepth >= 5 * ONE_PLY)
           {
-              delta = Value(18);
+              delta = Value(20);
               alpha = std::max(rootMoves[PVIdx].previousScore - delta,-VALUE_INFINITE);
               beta  = std::min(rootMoves[PVIdx].previousScore + delta, VALUE_INFINITE);
           }
@@ -453,7 +453,7 @@ void Thread::search(bool isMainThread) {
               else
                   break;
 
-              delta += delta / 4 + 5;
+              delta += delta / 3;
 
               assert(alpha >= -VALUE_INFINITE && beta <= VALUE_INFINITE);
           }
@@ -582,7 +582,7 @@ namespace {
     {
         // Step 2. Check for aborted search and immediate draw
         if (Signals.stop.load(std::memory_order_relaxed) || pos.is_draw() || ss->ply >= MAX_PLY)
-            return ss->ply >= MAX_PLY && !inCheck ? evaluate(pos) 
+            return ss->ply >= MAX_PLY && !inCheck ? evaluate(pos)
                                                   : DrawValue[pos.side_to_move()];
 
         // Step 3. Mate distance pruning. Even if we mate at the next move our score
@@ -901,7 +901,7 @@ moves_loop: // When in check search starts from here
               continue;
 
           // History based pruning
-          if (   depth <= 3 * ONE_PLY
+          if (   depth <= 2 * ONE_PLY
               && thisThread->history[pos.moved_piece(move)][to_sq(move)] < VALUE_ZERO
               && cmh[pos.moved_piece(move)][to_sq(move)] < VALUE_ZERO)
               continue;
