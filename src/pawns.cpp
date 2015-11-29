@@ -73,7 +73,7 @@ namespace {
   { V( 80), V(11), V(44), V(68), V(87), V( 90), V(119) } };
 
   // Danger of enemy pawns moving toward our king by [type][distance from edge][rank]
-  const Value StormDanger[][4][RANK_NB] = {
+  Value StormDanger[][4][RANK_NB] = {
   { { V( 0),  V(  67), V( 134), V(38), V(32) },
     { V( 0),  V(  57), V( 139), V(37), V(22) },
     { V( 0),  V(  43), V( 115), V(43), V(27) },
@@ -90,6 +90,8 @@ namespace {
     { V( 0),  V(  58), V( 141), V(39), V(18) },
     { V( 0),  V(  65), V( 142), V(48), V(32) },
     { V( 0),  V(  60), V( 126), V(51), V(19) } } };
+
+    TUNE(StormDanger);
 
   // Max bonus for king safety. Corresponds to start position with all the pawns
   // in front of the king and no enemy pawn on the horizon.
