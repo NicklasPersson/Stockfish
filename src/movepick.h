@@ -53,11 +53,11 @@ struct Stats {
 
   void update(Piece pc, Square to, Value v) {
 
-    if (abs(int(v)) >= 324)
+    if (abs(int(v)) >= 341)
         return;
 
-    table[pc][to] -= table[pc][to] * abs(int(v)) / (CM ? 512 : 324);
-    table[pc][to] += int(v) * (CM ? 64 : 32);
+    table[pc][to] -= table[pc][to] * abs(int(v)) / (CM ? 512 : 341);
+    table[pc][to] += int(v) * (CM ? 84 : 42);
   }
 
 private:

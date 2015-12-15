@@ -64,7 +64,7 @@ namespace {
   enum NodeType { Root, PV, NonPV };
 
   // Razoring and futility margin based on depth
-  const int razor_margin[4] = { 483, 570, 603, 554 };
+  const int razor_margin[4] = { 483, 570, 603, 603 };
   Value futility_margin(Depth d) { return Value(200 * d); }
 
   // Futility and reductions lookup tables, initialized at startup
@@ -158,7 +158,7 @@ void Search::init() {
           for (int d = 1; d < 64; ++d)
               for (int mc = 1; mc < 64; ++mc)
               {
-                  double r = K[pv][0] + log(d) * log(mc) / K[pv][1];
+                  double r = K[pv][0] + log(d * 1.20) * log(mc) / K[pv][1];
 
                   if (r >= 1.5)
                       Reductions[pv][imp][d][mc] = int(r) * ONE_PLY;
@@ -963,8 +963,7 @@ moves_loop: // When in check search starts from here
       if (    depth >= 3 * ONE_PLY
           &&  moveCount > 1
           && !captureOrPromotion
-          &&  move != ss->killers[0]
-          &&  move != ss->killers[1])
+          &&  move != ss->killers[0])
       {
           ss->reduction = reduction<PvNode>(improving, depth, moveCount);
 
@@ -1121,7 +1120,7 @@ moves_loop: // When in check search starts from here
         Value bonus = Value((depth / ONE_PLY) * (depth / ONE_PLY) + depth / ONE_PLY - 1);
         Square prevPrevSq = to_sq((ss - 2)->currentMove);
         CounterMovesStats& prevCmh = CounterMovesHistory[pos.piece_on(prevPrevSq)][prevPrevSq];
-        prevCmh.update(pos.piece_on(prevSq), prevSq, bonus);
+        prevCmh.update(pos.piece_on(prevSq), prevSq, bonus + Value(depth));
     }
 
     tte->save(posKey, value_to_tt(bestValue, ss->ply),
@@ -1405,7 +1404,7 @@ moves_loop: // When in check search starts from here
     if (is_ok((ss-1)->currentMove))
     {
         thisThread->counterMoves.update(pos.piece_on(prevSq), prevSq, move);
-        cmh.update(pos.moved_piece(move), to_sq(move), bonus);
+        cmh.update(pos.moved_piece(move), to_sq(move), bonus + Value(depth));
     }
 
     // Decrease all the other played quiet moves
@@ -1414,7 +1413,7 @@ moves_loop: // When in check search starts from here
         thisThread->history.update(pos.moved_piece(quiets[i]), to_sq(quiets[i]), -bonus);
 
         if (is_ok((ss-1)->currentMove))
-            cmh.update(pos.moved_piece(quiets[i]), to_sq(quiets[i]), -bonus);
+            cmh.update(pos.moved_piece(quiets[i]), to_sq(quiets[i]), -bonus - Value(depth));
     }
 
     // Extra penalty for a quiet TT move in previous ply when it gets refuted
@@ -1424,7 +1423,7 @@ moves_loop: // When in check search starts from here
     {
         Square prevPrevSq = to_sq((ss-2)->currentMove);
         CounterMovesStats& prevCmh = CounterMovesHistory[pos.piece_on(prevPrevSq)][prevPrevSq];
-        prevCmh.update(pos.piece_on(prevSq), prevSq, -bonus - 2 * (depth + 1) / ONE_PLY);
+        prevCmh.update(pos.piece_on(prevSq), prevSq, -bonus - 3 * (depth + 1) / ONE_PLY);
     }
   }
 

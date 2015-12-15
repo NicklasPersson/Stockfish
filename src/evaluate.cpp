@@ -111,7 +111,7 @@ namespace {
   enum { Mobility, PawnStructure, PassedPawns, Space, KingSafety };
 
   const struct Weight { int mg, eg; } Weights[] = {
-    {266, 334}, {214, 203}, {193, 262}, {47, 0}, {330, 0}
+    {266, 334}, {214, 191}, {193, 262}, {47, 0}, {330, 0}
   };
 
   Score operator*(Score s, const Weight& w) {
@@ -277,11 +277,6 @@ namespace {
           : Pt ==   ROOK ? attacks_bb<  ROOK>(s, pos.pieces() ^ pos.pieces(Us, ROOK, QUEEN))
                          : pos.attacks_from<Pt>(s);
 
-        if (ei.pinnedPieces[Us] & s)
-            b &= LineBB[pos.square<KING>(Us)][s];
-
-        ei.attackedBy[Us][ALL_PIECES] |= ei.attackedBy[Us][Pt] |= b;
-
         if (b & ei.kingRing[Them])
         {
             ei.kingAttackersCount[Us]++;
@@ -290,6 +285,11 @@ namespace {
             if (bb)
                 ei.kingAdjacentZoneAttacksCount[Us] += popcount<Max15>(bb);
         }
+
+        if (ei.pinnedPieces[Us] & s)
+            b &= LineBB[pos.square<KING>(Us)][s];
+
+        ei.attackedBy[Us][ALL_PIECES] |= ei.attackedBy[Us][Pt] |= b;
 
         if (Pt == QUEEN)
             b &= ~(  ei.attackedBy[Them][KNIGHT]
@@ -308,7 +308,7 @@ namespace {
                 score += Outpost[Pt == BISHOP][!!(ei.attackedBy[Us][PAWN] & s)];
             else
             {
-                bb &= b & ~pos.pieces(Us);
+                bb &= b & ~pos.pieces(Us, PAWN);
                 if (bb)
                    score += ReachableOutpost[Pt == BISHOP][!!(ei.attackedBy[Us][PAWN] & bb)];
             }
@@ -410,7 +410,7 @@ namespace {
         attackUnits =  std::min(72, ei.kingAttackersCount[Them] * ei.kingAttackersWeight[Them])
                      +  9 * ei.kingAdjacentZoneAttacksCount[Them]
                      + 27 * popcount<Max15>(undefended)
-                     + 11 * !!ei.pinnedPieces[Us]
+                     + 11 * popcount<Max15>(ei.pinnedPieces[Us])
                      - 64 * !pos.count<QUEEN>(Them)
                      - mg_value(score) / 8;
 
@@ -694,7 +694,7 @@ namespace {
     int pawns = pos.count<PAWN>(WHITE) + pos.count<PAWN>(BLACK);
 
     // Compute the initiative bonus for the attacking side
-    int initiative = 8 * (pawns + asymmetry + kingDistance - 15);
+    int initiative = 10 * (pawns + asymmetry + kingDistance - 15);
 
     // Now apply the bonus: note that we find the attacking side by extracting
     // the sign of the endgame value, and that we carefully cap the bonus so
