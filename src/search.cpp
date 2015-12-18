@@ -64,7 +64,7 @@ namespace {
   enum NodeType { Root, PV, NonPV };
 
   // Razoring and futility margin based on depth
-  const int razor_margin[4] = { 483, 570, 603, 554 };
+  const int razor_margin[4] = { 483, 570, 603, 603 };
   Value futility_margin(Depth d) { return Value(200 * d); }
 
   // Futility and reductions lookup tables, initialized at startup
@@ -158,7 +158,7 @@ void Search::init() {
           for (int d = 1; d < 64; ++d)
               for (int mc = 1; mc < 64; ++mc)
               {
-                  double r = K[pv][0] + log(d) * log(mc) / K[pv][1];
+                  double r = K[pv][0] + log(d * 1.20) * log(mc) / K[pv][1];
 
                   if (r >= 1.5)
                       Reductions[pv][imp][d][mc] = int(r) * ONE_PLY;
@@ -963,8 +963,7 @@ moves_loop: // When in check search starts from here
       if (    depth >= 3 * ONE_PLY
           &&  moveCount > 1
           && !captureOrPromotion
-          &&  move != ss->killers[0]
-          &&  move != ss->killers[1])
+          &&  move != ss->killers[0])
       {
           ss->reduction = reduction<PvNode>(improving, depth, moveCount);
 
