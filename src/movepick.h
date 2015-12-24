@@ -36,13 +36,15 @@
 /// Countermoves store the move that refute a previous one. Entries are stored
 /// using only the moving piece and destination square, hence two moves with
 /// different origin but same destination and piece will be considered identical.
-template<typename T, bool CM = false>
+template<typename T, bool CM = false, int N = PIECE_NB>
 struct Stats {
 
   static const Value Max = Value(1 << 28);
 
   const T* operator[](Piece pc) const { return table[pc]; }
   T* operator[](Piece pc) { return table[pc]; }
+  const T* operator[](PieceType pt) const { return table[pt]; }
+  T* operator[](PieceType pt) { return table[pt]; }
   void clear() { std::memset(table, 0, sizeof(table)); }
 
   void update(Piece pc, Square to, Move m) {
@@ -61,13 +63,13 @@ struct Stats {
   }
 
 private:
-  T table[PIECE_NB][SQUARE_NB];
+  T table[N][SQUARE_NB];
 };
 
 typedef Stats<Move> MovesStats;
 typedef Stats<Value, false> HistoryStats;
 typedef Stats<Value,  true> CounterMovesStats;
-typedef Stats<CounterMovesStats> CounterMovesHistoryStats;
+typedef Stats<CounterMovesStats, PIECE_TYPE_NB> CounterMovesHistoryStats;
 
 
 /// MovePicker class is used to pick one pseudo legal move at a time from the
